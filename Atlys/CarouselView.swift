@@ -17,14 +17,14 @@ class CarouselView: UIView, UIScrollViewDelegate {
     init(frame: CGRect, images: [UIImage]) {
         self.images = images
         super.init(frame: frame)
-        setupScrollView()
-        setupImageViews()
-        setupPageControl()
-        scrollToInitialPosition()
+        setupViews()
     }
     
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupViews() {
         setupScrollView()
         setupImageViews()
         setupPageControl()
@@ -32,9 +32,8 @@ class CarouselView: UIView, UIScrollViewDelegate {
     }
     
     private func setupScrollView() {
-        scrollView.frame = self.bounds
+        scrollView.frame = bounds
         scrollView.backgroundColor = .clear
-        scrollView.isPagingEnabled = false // Disable built-in paging
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.delegate = self
         self.addSubview(scrollView)
@@ -43,10 +42,10 @@ class CarouselView: UIView, UIScrollViewDelegate {
     private func setupImageViews() {
         guard !images.isEmpty else { return }
         
-        let imageWidth: CGFloat = self.frame.width / 2
+        let imageWidth: CGFloat = 0.6*(frame.height)
         let imageHeight: CGFloat = imageWidth
         
-        scrollView.contentSize = CGSize(width: imageWidth * CGFloat(images.count) + self.frame.width - imageWidth, height: self.frame.height)
+        scrollView.contentSize = CGSize(width: imageWidth * CGFloat(images.count) + frame.width - imageWidth, height: frame.height)
         
         for (index, image) in images.enumerated() {
             let imageView = UIImageView(image: image)
@@ -54,14 +53,13 @@ class CarouselView: UIView, UIScrollViewDelegate {
             imageView.clipsToBounds = true
             imageView.layer.cornerRadius = 10
             
-            let xPosition = CGFloat(index) * imageWidth + self.frame.width / 2 - imageWidth / 2
+            let xPosition = CGFloat(index) * imageWidth + frame.width / 2 - imageWidth / 2
             imageView.frame = CGRect(x: xPosition, y: 0, width: imageWidth, height: imageHeight)
             
             scrollView.addSubview(imageView)
             imageViews.append(imageView)
         }
         
-        // Directly call updateImageViewSizes after setup
         updateImageViewSizes()
     }
     
@@ -71,12 +69,11 @@ class CarouselView: UIView, UIScrollViewDelegate {
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         pageControl.pageIndicatorTintColor = UIColor.lightGray
         pageControl.currentPageIndicatorTintColor = UIColor.black
-        self.addSubview(pageControl)
+        addSubview(pageControl)
         
-        // Constraints for the page control
         NSLayoutConstraint.activate([
             pageControl.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            pageControl.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
+            pageControl.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
     }
     
@@ -126,7 +123,6 @@ class CarouselView: UIView, UIScrollViewDelegate {
         
         targetContentOffset.pointee = CGPoint(x: adjustedTargetX, y: 0)
         
-        // Snap to the correct page and update the page control
         snapToCenter(targetOffset: targetContentOffset.pointee)
     }
     
